@@ -13,16 +13,14 @@ public class GenPngEditor
     public static void GenRhombusPng()
     {
         Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        Debug.Log($"{texture.GetPixel(0, 0)}");
         ChangePixels(texture);
         byte[] bytes = texture.EncodeToPNG();
         var dirPath = Application.dataPath + "/Resources/AutoGenPngs/";
-        Debug.Log(dirPath);
         if (!Directory.Exists(dirPath))
         {
             Directory.CreateDirectory(dirPath);
         }
-        File.WriteAllBytes(dirPath + "Image2" + ".png", bytes);
+        File.WriteAllBytes(dirPath + "Image1" + ".png", bytes);
         AssetDatabase.Refresh();
     }
 
