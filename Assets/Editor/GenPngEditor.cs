@@ -121,7 +121,6 @@ public class GenPngEditor
     private static void FillColor(Texture2D texture, int x, int y)
     {
         var pixels = texture.GetPixels();
-        Debug.Log($"p len:{pixels.Length}");
         List<bool> visisted = new List<bool>();
         for (int i = 0; i < pixels.Length; ++i)
         {
@@ -167,7 +166,6 @@ public class GenPngEditor
 
     private static int GetIndex(Vector2Int v)
     {
-        Debug.Log($"index:{v.x + v.y * width}");
         return v.x + v.y * width;
     }
 }
