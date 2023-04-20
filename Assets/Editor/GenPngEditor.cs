@@ -3,12 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Tilemaps;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GenPngEditor
 {
     private const int width = 256;
     private const int height = 256;
+
+    private static readonly string PalettesDir = "Assets/Palettes/";
 
     [MenuItem("MapTool/GenRhombusPng")]
     public static void GenRhombusPng()
@@ -21,8 +25,34 @@ public class GenPngEditor
         {
             Directory.CreateDirectory(dirPath);
         }
-        File.WriteAllBytes(dirPath + "Image1" + ".png", bytes);
+        File.WriteAllBytes(dirPath + "Image11.png", bytes);
         AssetDatabase.Refresh();
+
+        Sprite sp = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Resources/AutoGenPngs/Image11.png", typeof(Sprite));
+        var tile = ScriptableObject.CreateInstance<Tile>();
+        tile.sprite = sp;
+        AssetDatabase.CreateAsset(tile, "Assets/Tiles/test.asset");
+        AssetDatabase.Refresh();
+    }
+
+    [MenuItem("MapTool/Test")]
+    static void ImportExample()
+    {
+        var owner = GridPaintPaletteWindow.instances[0];
+        owner.Focus();
+
+        GameObject go = GridPaletteUtility.CreateNewPalette(PalettesDir, "test", GridLayout.CellLayout.Isometric, GridPalette.CellSizing.Manual, new Vector3(1, 0.5f)
+            , GridLayout.CellSwizzle.XYZ, TransparencySortMode.Default, new Vector3(0, 0, 1f));
+        if (go != null)
+        {
+            Tilemap tm = go.GetComponentInChildren<Tilemap>();
+            tm.tileAnchor = new Vector3(1, 1, 0);
+            var tile = (TileBase)AssetDatabase.LoadAssetAtPath("Assets/Tiles/base00.asset", typeof(TileBase));
+            tm.SetTile(Vector3Int.zero, tile);
+            owner.palette = go;
+            owner.Repaint();
+            owner.SavePalette();
+        }
     }
 
     private static void ChangePixels(Texture2D texture)
