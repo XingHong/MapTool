@@ -25,7 +25,7 @@ public class GenPaletteTool
             Tilemap tm = go.GetComponentInChildren<Tilemap>();
             tm.tileAnchor = new Vector3(1, 1, 0);
             TilemapRenderer tmr = go.GetComponentInChildren<TilemapRenderer>();
-            tmr.mode = TilemapRenderer.Mode.Individual;
+            //tmr.mode = TilemapRenderer.Mode.Individual;
             var tile = (TileBase)AssetDatabase.LoadAssetAtPath("Assets/Tiles/base00.asset", typeof(TileBase));
             tm.SetTile(Vector3Int.zero, tile);
             if (owner != null)
