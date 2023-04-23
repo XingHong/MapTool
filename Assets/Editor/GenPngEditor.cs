@@ -11,10 +11,11 @@ public class GenPngEditor
 {
     private const int width = 256;
     private const int height = 256;
+    private static Color curColor;
 
-    [MenuItem("MapTool/CreateRhombusPng")]
-    public static void CreateRhombusPng()
+    public static void CreateRhombusPng(int index, Color color)
     {
+        curColor = color;
         Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
         ChangePixels(texture);
         byte[] bytes = texture.EncodeToPNG();
@@ -23,14 +24,15 @@ public class GenPngEditor
         {
             Directory.CreateDirectory(dirPath);
         }
-        File.WriteAllBytes(dirPath + "Image11.png", bytes);
-        AssetDatabase.Refresh();
+        File.WriteAllBytes(dirPath + $"Color{index}.png", bytes);
+    }
 
-        Sprite sp = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Resources/AutoGenPngs/Image11.png", typeof(Sprite));
+    public static void CreateRhombusTile(int index, Color color)
+    {
+        Sprite sp = (Sprite)AssetDatabase.LoadAssetAtPath($"Assets/Resources/AutoGenPngs/Color{index}.png", typeof(Sprite));
         var tile = ScriptableObject.CreateInstance<Tile>();
         tile.sprite = sp;
-        AssetDatabase.CreateAsset(tile, "Assets/Tiles/test.asset");
-        AssetDatabase.Refresh();
+        AssetDatabase.CreateAsset(tile, $"Assets/Tiles/Tile{index}.asset");
     }
 
     private static void ChangePixels(Texture2D texture)
@@ -123,7 +125,7 @@ public class GenPngEditor
 
     private static void Plot(Texture2D texture, int x, int y)
     {
-        texture.SetPixel(x, y, Color.black);
+        texture.SetPixel(x, y, curColor);
     }
 
     private static void FillColor(Texture2D texture, int x, int y)
