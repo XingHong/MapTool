@@ -14,7 +14,14 @@ public class AutoGenTileMapProcess
         ReadScreenshot();
         success = GenColorTiles();
         if (success)
+        {
             GenPaletteTool.CreatePalette(curSO.tileColors.Length);
+        }
+        else
+        {
+            Debug.LogError("GenColorTiles fail!");
+            return;
+        }
         PainTool.Pain(curSO);
     }
 

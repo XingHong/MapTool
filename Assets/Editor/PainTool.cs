@@ -31,6 +31,7 @@ public class PainTool
             tileArray[index] = GetTileBase(tex, index / size.y, index % size.y);
         }
         sceneTM.SetTiles(positions, tileArray);
+        EditorSceneManager.SaveOpenScenes();
     }
 
     private static void CreateColorDict(TextureColorScriptableObject tcSO)
@@ -73,12 +74,18 @@ public class PainTool
     private static TileBase GetTileBase(Texture2D tex, int x, int y)
     {
         var texturePos = ToTexturePos(x, y);
+        Color color;
         if (texturePos.x >= 0 && texturePos.x < screenshotLen && texturePos.y >= 0 && texturePos.y < screenshotLen)
         {
-            Color color = tex.GetPixel(texturePos.y, texturePos.x);     //宽高相反
-            return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile{colorDict[color]}.asset", typeof(TileBase));
+            color = tex.GetPixel(texturePos.y, texturePos.x);     //宽高相反
         }
-        return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile0.asset", typeof(TileBase)); ;
+        else
+        {
+            int xx = Mathf.Min(texturePos.x, 1023);
+            int yy = Mathf.Min(texturePos.y, 1023);
+            color = tex.GetPixel(yy, xx);
+        }
+        return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile{colorDict[color]}.asset", typeof(TileBase));
     }
 
     private static Vector2Int ToTexturePos(int x, int y)
