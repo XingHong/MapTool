@@ -10,8 +10,9 @@ public class AutoGenTileMapProcess
     [MenuItem("MapTool/CreateTileMapByScreenshot")]
     public static void CreateTileMapByScreenshot()
     {
-        bool success = false;
+        DeleteAllFilesInFolder();
         ReadScreenshot();
+        bool success = false;
         success = GenColorTiles();
         if (success)
         {
@@ -23,6 +24,17 @@ public class AutoGenTileMapProcess
             return;
         }
         PainTool.Pain(curSO);
+    }
+
+    static void DeleteAllFilesInFolder()
+    {
+        string[] unusedFolder = { MapToolPath.PalettesDir, MapToolPath.AutoGenPngsDir, MapToolPath.TilesDir };
+        foreach (var asset in AssetDatabase.FindAssets("", unusedFolder))
+        {
+            var path = AssetDatabase.GUIDToAssetPath(asset);
+            AssetDatabase.DeleteAsset(path);
+        }
+        AssetDatabase.Refresh();
     }
 
     public static void ReadScreenshot()

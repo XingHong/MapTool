@@ -84,6 +84,7 @@ public class PainTool
             int xx = Mathf.Min(texturePos.x, 1023);
             int yy = Mathf.Min(texturePos.y, 1023);
             color = tex.GetPixel(yy, xx);
+            //return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile1.asset", typeof(TileBase));
         }
         return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile{colorDict[color]}.asset", typeof(TileBase));
     }
