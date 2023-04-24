@@ -9,9 +9,14 @@ using UnityEditor.Tilemaps;
 public class PainTool
 {
     private static readonly Vector3Int size = new Vector3Int(1025, 257, 0);         //高宽（这样才是正方形）
-    [MenuItem("MapTool/PainTest")]
-    public static void Pain()
+    private static readonly int screenshotLen = 1024;
+    private static Dictionary<Color, int> colorDict;
+
+    public static void Pain(TextureColorScriptableObject tcSO)
     {
+        CreateColorDict(tcSO);
+        var tex = (Texture2D)AssetDatabase.LoadAssetAtPath(MapToolPath.ScreenshotPng, typeof(Texture2D));
+
         Tilemap sceneTM = GetSceneTileMap();
         sceneTM.ClearAllTiles();
         Tilemap palettleTM = GetPaletteTileMap();
@@ -22,15 +27,24 @@ public class PainTool
         TileBase[] tileArray = new TileBase[positions.Length];
         for (int index = 0; index < positions.Length; index++)
         {
-            positions[index] = ToCustomPos(index / size.y, index % size.y);
-            tileArray[index] = tb;
+            positions[index] = ToTilePos(index / size.y, index % size.y);
+            tileArray[index] = GetTileBase(tex, index / size.y, index % size.y);
         }
         sceneTM.SetTiles(positions, tileArray);
     }
 
+    private static void CreateColorDict(TextureColorScriptableObject tcSO)
+    {
+        colorDict = new Dictionary<Color, int>();
+        foreach (var item in tcSO.tileColors)
+        {
+            colorDict.Add(item.color, item.index);
+        }
+    }
+
     public static Tilemap GetSceneTileMap()
     {
-        var scene = EditorSceneManager.OpenScene("Assets/Scenes/SampleScene.unity");
+        var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
         foreach (var go in scene.GetRootGameObjects())
         {
             Tilemap res = go.GetComponentInChildren<Tilemap>();
@@ -47,12 +61,30 @@ public class PainTool
         return palette.GetComponentInChildren<Tilemap>();
     }
 
-    private static Vector3Int ToCustomPos(int x, int y)
+    private static Vector3Int ToTilePos(int x, int y)
     {
         int basex = -(x / 2);
         int basey = -(x + 1) / 2;
         int tox = basex + y;
         int toy = basey - y;
         return new Vector3Int(tox, toy, 0);
+    }
+
+    private static TileBase GetTileBase(Texture2D tex, int x, int y)
+    {
+        var texturePos = ToTexturePos(x, y);
+        if (texturePos.x >= 0 && texturePos.x < screenshotLen && texturePos.y >= 0 && texturePos.y < screenshotLen)
+        {
+            Color color = tex.GetPixel(texturePos.y, texturePos.x);     //宽高相反
+            return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile{colorDict[color]}.asset", typeof(TileBase));
+        }
+        return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile0.asset", typeof(TileBase)); ;
+    }
+
+    private static Vector2Int ToTexturePos(int x, int y)
+    {
+        float px = screenshotLen - x;
+        float py = ((x % 2) * 0.5f + y) * 4;
+        return new Vector2Int((int)px, (int)py);
     }
 }

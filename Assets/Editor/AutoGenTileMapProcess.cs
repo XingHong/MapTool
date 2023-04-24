@@ -15,7 +15,7 @@ public class AutoGenTileMapProcess
         success = GenColorTiles();
         if (success)
             GenPaletteTool.CreatePalette(curSO.tileColors.Length);
-        PainTool.Pain();
+        PainTool.Pain(curSO);
     }
 
     public static void ReadScreenshot()
