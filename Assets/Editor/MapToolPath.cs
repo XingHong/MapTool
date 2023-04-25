@@ -10,4 +10,5 @@ public class MapToolPath
     public static readonly string ScreenshotPng = "Assets/Resources/Screenshot/screenshot.png";
     public static readonly string TextureColorSO = "Assets/TextureColorSO.asset";
     public static readonly string MapSecene = "Assets/Scenes/SampleScene.unity";
+    public static readonly string MapInfoPrefab = "Assets/Resources/TMP/TileInfo.prefab";
 }

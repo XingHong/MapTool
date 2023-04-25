@@ -5,33 +5,81 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEditor.Tilemaps;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class PainTool
 {
     private static readonly Vector3Int size = new Vector3Int(1025, 257, 0);         //高宽（这样才是正方形）
     private static readonly int screenshotLen = 1024;
+    private static readonly List<Vector3Int> dirs = new List<Vector3Int>() { new Vector3Int(0,1,0), new Vector3Int(1,0,0), new Vector3Int(0,-1,0), new Vector3Int(-1,0,0)};
     private static Dictionary<Color, int> colorDict;
 
     public static void Pain(TextureColorScriptableObject tcSO)
     {
         CreateColorDict(tcSO);
         var tex = (Texture2D)AssetDatabase.LoadAssetAtPath(MapToolPath.ScreenshotPng, typeof(Texture2D));
-
-        Tilemap sceneTM = GetSceneTileMap();
+        var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
+        Tilemap sceneTM = GetSceneTileMap(scene);
         sceneTM.ClearAllTiles();
-        Tilemap palettleTM = GetPaletteTileMap();
 
         //生成瓦片
-        TileBase tb = palettleTM.GetTile(Vector3Int.zero);
         Vector3Int[] positions = new Vector3Int[size.x * size.y];
         TileBase[] tileArray = new TileBase[positions.Length];
         for (int index = 0; index < positions.Length; index++)
         {
             positions[index] = ToTilePos(index / size.y, index % size.y);
-            tileArray[index] = GetTileBase(tex, index / size.y, index % size.y);
+            tileArray[index] = GetTileBase(tex, index / size.y, index % size.y); ;
         }
         sceneTM.SetTiles(positions, tileArray);
         EditorSceneManager.SaveOpenScenes();
+    }
+
+    [MenuItem("MapTool/RefreshEdgeInfo")]
+    static void Test()
+    {
+        var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
+        Tilemap sceneTM = GetSceneTileMap(scene);
+        int len = size.x * size.y / 2;
+        //len = 10;
+        var prefab = (GameObject)AssetDatabase.LoadAssetAtPath(MapToolPath.MapInfoPrefab, typeof(GameObject));
+        var root = GetCanvas(scene);
+        for (int index = 0; index < len; ++index)
+        {
+            var pos = ToTilePos(index / size.y, index % size.y);
+            string dirText = GetEdgeInfo(sceneTM, pos);
+            if (dirText != "0000")
+            { 
+                var worldPos = sceneTM.GetCellCenterWorld(pos);
+                worldPos.y -= 0.25f;
+                var go = GameObject.Instantiate<GameObject>(prefab);
+                var tmp = go.GetComponent<TextMeshProUGUI>();
+                tmp.text = dirText;
+                go.hideFlags = HideFlags.HideAndDontSave;
+                go.transform.SetParent(root.transform);
+                go.transform.position = worldPos;
+            }
+        }
+    }
+
+    private static string GetEdgeInfo(Tilemap tileMap, Vector3Int pos)
+    {
+        var curTile = tileMap.GetTile(pos);
+        string res = "";
+        for (int i = 0; i < dirs.Count; ++i)
+        {
+            Vector3Int nextPos = pos + dirs[i];
+            var tile = tileMap.GetTile(nextPos);
+            if (tile == null)
+            {
+                res += "0";
+            }
+            else
+            { 
+                res += tile.name == curTile.name ? "0" : "1";
+            }
+        }
+        return res;
     }
 
     private static void CreateColorDict(TextureColorScriptableObject tcSO)
@@ -43,14 +91,24 @@ public class PainTool
         }
     }
 
-    public static Tilemap GetSceneTileMap()
+    public static Tilemap GetSceneTileMap(Scene scene)
     {
-        var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
+        
         foreach (var go in scene.GetRootGameObjects())
         {
             Tilemap res = go.GetComponentInChildren<Tilemap>();
             if (res != null)
                 return res;
+        }
+        return null;
+    }
+
+    public static GameObject GetCanvas(Scene scene)
+    {
+        foreach (var go in scene.GetRootGameObjects())
+        {
+            if (go.name == "Canvas")
+                return go;
         }
         return null;
     }
