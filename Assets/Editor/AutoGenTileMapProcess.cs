@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+//using System.Drawing;
 
 public class AutoGenTileMapProcess
 {
@@ -35,6 +36,7 @@ public class AutoGenTileMapProcess
             var path = AssetDatabase.GUIDToAssetPath(asset);
             AssetDatabase.DeleteAsset(path);
         }
+        AssetDatabase.DeleteAsset(MapToolPath.TextureColorSO);
         AssetDatabase.Refresh();
     }
 
