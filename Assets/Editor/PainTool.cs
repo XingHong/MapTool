@@ -35,13 +35,18 @@ public class PainTool
         EditorSceneManager.SaveOpenScenes();
     }
 
+    [MenuItem("MapTool/ClearEdgeInfo")]
+    static void ClearEdgeInfo()
+    {
+        EditorSceneManager.OpenScene(MapToolPath.MapSecene);
+    }
+
     [MenuItem("MapTool/RefreshEdgeInfo")]
-    static void Test()
+    static void RefreshEdgeInfo()
     {
         var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
         Tilemap sceneTM = GetSceneTileMap(scene);
-        int len = size.x * size.y / 2;
-        //len = 10;
+        int len = size.x * size.y;
         var prefab = (GameObject)AssetDatabase.LoadAssetAtPath(MapToolPath.MapInfoPrefab, typeof(GameObject));
         var root = GetCanvas(scene);
         for (int index = 0; index < len; ++index)
@@ -49,7 +54,7 @@ public class PainTool
             var pos = ToTilePos(index / size.y, index % size.y);
             string dirText = GetEdgeInfo(sceneTM, pos);
             if (dirText != "0000")
-            { 
+            {
                 var worldPos = sceneTM.GetCellCenterWorld(pos);
                 worldPos.y -= 0.25f;
                 var go = GameObject.Instantiate<GameObject>(prefab);
@@ -60,6 +65,27 @@ public class PainTool
                 go.transform.position = worldPos;
             }
         }
+        EditorSceneManager.SaveOpenScenes();
+    }
+
+    public static List<ExportData> GenEdgeInfo()
+    {
+        List<ExportData> res = new List<ExportData>();
+        var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
+        Tilemap sceneTM = GetSceneTileMap(scene);
+        int len = size.x * size.y;
+        for (int index = 0; index < len; ++index)
+        {
+            var pos = ToTilePos(index / size.y, index % size.y);
+            string dirText = GetEdgeInfo(sceneTM, pos);
+            var curTile = sceneTM.GetTile(pos);
+            var groundId = GetTileGroupId(curTile.name);
+            var data = new ExportData();
+            data.groupId = groundId;
+            data.dirInfo = dirText == "0000" ? "0" : dirText;
+            res.Add(data);
+        }
+        return res;
     }
 
     private static string GetEdgeInfo(Tilemap tileMap, Vector3Int pos)
@@ -80,6 +106,12 @@ public class PainTool
             }
         }
         return res;
+    }
+
+    private static int GetTileGroupId(string str)
+    {
+        string numStr = str.Substring(4);
+        return int.Parse(numStr);
     }
 
     private static void CreateColorDict(TextureColorScriptableObject tcSO)

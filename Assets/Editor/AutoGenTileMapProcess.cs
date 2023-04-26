@@ -24,6 +24,7 @@ public class AutoGenTileMapProcess
             return;
         }
         PainTool.Pain(curSO);
+        ExportTool.GenData();
     }
 
     static void DeleteAllFilesInFolder()
