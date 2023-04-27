@@ -29,7 +29,6 @@ public class Test : MonoBehaviour
         int basey = -(x + 1) / 2;
         int tox = basex + y;
         int toy = basey - y;
-        Debug.Log($"tox:{tox}, toy:{toy}");
         return new Vector3Int(tox, toy, 0);
     }
 }
