@@ -12,21 +12,29 @@ public class AutoGenTileMapProcess
     [MenuItem("MapTool/CreateTileMapByScreenshot")]
     public static void CreateTileMapByScreenshot()
     {
+        EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "清理老数据", 0.1f);
         DeleteAllFilesInFolder();
+        EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "读取缩略图", 0.3f);
         ReadScreenshot();
         bool success = false;
+        EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成自定义瓦片", 0.5f);
         success = GenColorTiles();
         if (success)
         {
+            EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成调色板", 0.6f);
             GenPaletteTool.CreatePalette(curSO.tileColors.Length);
         }
         else
         {
             Debug.LogError("GenColorTiles fail!");
+            EditorUtility.ClearProgressBar();
             return;
         }
+        EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成场景", 0.7f);
         PainTool.Pain(curSO);
+        EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成数据", 0.9f);
         ExportTool.GenData();
+        EditorUtility.ClearProgressBar();
     }
 
     static void DeleteAllFilesInFolder()
