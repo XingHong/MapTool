@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Color = System.Drawing.Color;
 
 public class TextureColorScriptableObject : ScriptableObject
 {
@@ -15,6 +14,6 @@ public class TextureColorData
     public TextureColorData()
     {
         index = 0;
-        color = Color.blue;
+        color = Color.White;
     }
 }

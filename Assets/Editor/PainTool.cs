@@ -7,6 +7,8 @@ using UnityEngine.Tilemaps;
 using UnityEditor.Tilemaps;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Color = System.Drawing.Color;
+using System.Drawing;
 
 public class PainTool
 {
@@ -18,7 +20,7 @@ public class PainTool
     public static void Pain(TextureColorScriptableObject tcSO)
     {
         CreateColorDict(tcSO);
-        var tex = (Texture2D)AssetDatabase.LoadAssetAtPath(MapToolPath.ScreenshotPng, typeof(Texture2D));
+        Bitmap bitmap = new Bitmap(MapToolPath.ScreenshotPngEX);
         var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
         Tilemap sceneTM = GetSceneTileMap(scene);
         sceneTM.ClearAllTiles();
@@ -29,7 +31,7 @@ public class PainTool
         for (int index = 0; index < positions.Length; index++)
         {
             positions[index] = ToTilePos(index / size.y, index % size.y);
-            tileArray[index] = GetTileBase(tex, index / size.y, index % size.y); ;
+            tileArray[index] = GetTileBase(bitmap, index / size.y, index % size.y); ;
         }
         sceneTM.SetTiles(positions, tileArray);
         EditorSceneManager.SaveOpenScenes();
@@ -161,19 +163,19 @@ public class PainTool
         return new Vector3Int(tox, toy, 0);
     }
 
-    private static TileBase GetTileBase(Texture2D tex, int x, int y)
+    private static TileBase GetTileBase(Bitmap bitmap, int x, int y)
     {
         var texturePos = ToTexturePos(x, y);
         Color color;
         if (texturePos.x >= 0 && texturePos.x < screenshotLen && texturePos.y >= 0 && texturePos.y < screenshotLen)
         {
-            color = tex.GetPixel(texturePos.y, texturePos.x);     //宽高相反
+            color = bitmap.GetPixel(texturePos.y, texturePos.x);     //宽高相反
         }
         else
         {
             int xx = Mathf.Min(texturePos.x, 1023);
             int yy = Mathf.Min(texturePos.y, 1023);
-            color = tex.GetPixel(yy, xx);
+            color = bitmap.GetPixel(yy, xx);
             //return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile1.asset", typeof(TileBase));
         }
         return (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile{colorDict[color]}.asset", typeof(TileBase));
@@ -181,7 +183,7 @@ public class PainTool
 
     private static Vector2Int ToTexturePos(int x, int y)
     {
-        float px = screenshotLen - x;
+        float px = x;
         float py = ((x % 2) * 0.5f + y) * 4;
         return new Vector2Int((int)px, (int)py);
     }
