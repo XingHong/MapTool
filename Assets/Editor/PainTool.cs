@@ -35,6 +35,15 @@ public class PainTool
         }
         sceneTM.SetTiles(positions, tileArray);
         EditorSceneManager.SaveOpenScenes();
+        AssetDatabase.Refresh();
+    }
+
+    public static void ClearSceneTilemap()
+    {
+        var scene = EditorSceneManager.OpenScene(MapToolPath.MapSecene);
+        Tilemap sceneTM = GetSceneTileMap(scene);
+        sceneTM.ClearAllTiles();
+        EditorSceneManager.SaveOpenScenes();
     }
 
     [MenuItem("MapTool/ClearEdgeInfo")]
@@ -112,6 +121,11 @@ public class PainTool
 
     private static int GetTileGroupId(string str)
     {
+        if (str.Length <= 4)
+        {
+            Debug.LogError("Export data error, string too short!");
+            return -1;
+        }
         string numStr = str.Substring(4);
         return int.Parse(numStr);
     }

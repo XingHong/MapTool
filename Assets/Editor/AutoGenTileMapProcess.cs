@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Drawing;
 using Color = System.Drawing.Color;
+using System.IO;
 
 public class AutoGenTileMapProcess
 {
@@ -14,9 +15,26 @@ public class AutoGenTileMapProcess
     {
         EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "清理老数据", 0.1f);
         DeleteAllFilesInFolder();
+
         EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "读取缩略图", 0.3f);
-        ReadScreenshot();
-        bool success = false;
+        int errorCode = ReadScreenshot();
+        bool success = errorCode == 0;
+        if (!success)
+        {
+            switch (errorCode)
+            {
+                case -1:
+                    ErrorDialog("screenshot error!", "数据生成", "数据生成失败，缩率图规格不符合", "ok");
+                    break;
+                case -2:
+                    ErrorDialog("color count error!", "数据生成", "数据生成失败，颜色数量不符合（大于64种颜色）", "ok");
+                    break;
+                case -3:
+                    ErrorDialog("screenshot png not exist!", "数据生成", "数据生成失败，缩率图不存在", "ok");
+                    break;
+            }
+            return;
+        }
         EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成自定义瓦片", 0.5f);
         success = GenColorTiles();
         if (success)
@@ -26,19 +44,28 @@ public class AutoGenTileMapProcess
         }
         else
         {
-            Debug.LogError("GenColorTiles fail!");
-            EditorUtility.ClearProgressBar();
+            ErrorDialog("GenColorTiles fail!", "数据生成", "数据生成失败，瓦片数据有问题", "ok");
             return;
         }
         EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成场景", 0.7f);
         PainTool.Pain(curSO);
         EditorUtility.DisplayProgressBar("依据缩略图生成瓦片数据", "生成数据", 0.9f);
-        ExportTool.GenData();
+        //ExportTool.GenData();
         EditorUtility.ClearProgressBar();
+        EditorUtility.DisplayDialog("数据生成", "数据生成成功", "ok");
     }
 
+    private static void ErrorDialog(string errorStr, string title, string msg, string ok)
+    {
+        Debug.LogError(errorStr);
+        EditorUtility.ClearProgressBar();
+        EditorUtility.DisplayDialog(title, msg, ok);
+    }
+
+    //[MenuItem("MapTool/ClearAllData")]
     static void DeleteAllFilesInFolder()
     {
+        PainTool.ClearSceneTilemap();
         string[] unusedFolder = { MapToolPath.PalettesDir, MapToolPath.AutoGenPngsDir, MapToolPath.TilesDir };
         foreach (var asset in AssetDatabase.FindAssets("", unusedFolder))
         {
@@ -49,17 +76,25 @@ public class AutoGenTileMapProcess
         AssetDatabase.Refresh();
     }
 
-    public static void ReadScreenshot()
+    public static int ReadScreenshot()
     {
+        if (!File.Exists(MapToolPath.ScreenshotPngEX))
+            return -3;
         Bitmap bitmap = new Bitmap(MapToolPath.ScreenshotPngEX);
-        SaveTextureColorAsset(bitmap);
+        if (bitmap.Width != bitmap.Height && bitmap.Width != 1024)
+            return -1;
+        int errorCode = SaveTextureColorAsset(bitmap);
         AssetDatabase.Refresh();
+        return errorCode;
     }
 
-    private static void SaveTextureColorAsset(Bitmap bitmap)
+    private static int SaveTextureColorAsset(Bitmap bitmap)
     {
+        int errorCode = 0;
         var pixels = GetPixels(bitmap);
         HashSet<Color> colorSet = new HashSet<Color>(pixels);
+        if (colorSet.Count > 64)
+            return -2;
         TextureColorScriptableObject newScriptableObject = ScriptableObject.CreateInstance<TextureColorScriptableObject>();
         newScriptableObject.tileColors = new TextureColorData[colorSet.Count];
         int i = 0;
@@ -72,6 +107,7 @@ public class AutoGenTileMapProcess
             ++i;
         }
         AssetDatabase.CreateAsset(newScriptableObject, MapToolPath.TextureColorSO);
+        return errorCode;
     }
 
     private static List<Color> GetPixels(Bitmap bitmap)
