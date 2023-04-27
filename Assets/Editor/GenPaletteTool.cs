@@ -19,11 +19,11 @@ public class GenPaletteTool
             Tilemap tm = go.GetComponentInChildren<Tilemap>();
             tm.tileAnchor = new Vector3(1, 1, 0);
             TilemapRenderer tmr = go.GetComponentInChildren<TilemapRenderer>();
-            Vector2Int size = new Vector2Int(len / 2, len / 2);     //¸ß¿í
+            int size = (int)Mathf.Sqrt(len) + 1;
             for (int i = 0; i < len; ++i)
             { 
                 var tile = (TileBase)AssetDatabase.LoadAssetAtPath($"Assets/Tiles/Tile{i}.asset", typeof(TileBase));
-                Vector3Int pos = new Vector3Int(i / size.y, i % size.y);
+                Vector3Int pos = new Vector3Int(i / size, i % size);
                 tm.SetTile(pos, tile);
             }
             if (owner != null)
