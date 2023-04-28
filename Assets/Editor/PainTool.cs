@@ -93,7 +93,7 @@ public class PainTool
             var groundId = GetTileGroupId(curTile.name);
             var data = new ExportData();
             data.groupId = groundId;
-            data.dirInfo = dirText == "0000" ? "0" : dirText;
+            data.dirInfo = dirText == "0000" ? string.Empty : dirText;
             res.Add(data);
         }
         return res;

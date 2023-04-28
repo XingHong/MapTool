@@ -19,12 +19,19 @@ public class ExportTool
         StreamWriter file = new StreamWriter(luaFilePath, false, Encoding.UTF8);
         file.NewLine = System.Environment.NewLine;
         List<ExportData> list = PainTool.GenEdgeInfo();
-        file.WriteLine("-- auto generate by maptool");
+        file.WriteLine("-- auto generate by maptool, number x represent x_0000");
         file.WriteLine("MapData = {");
         for (int i = 0; i < list.Count; ++i)
         {
             var item = list[i];
-            file.WriteLine("\"" + item.groupId + "_" + item.dirInfo + "\",");
+            if (string.IsNullOrEmpty(item.dirInfo))
+            {
+                file.WriteLine(item.groupId + ",");
+            }
+            else
+            {
+                file.WriteLine("\"" + item.groupId + "_" + item.dirInfo + "\",");
+            }
         }
         file.WriteLine("}");
         file.Close();
