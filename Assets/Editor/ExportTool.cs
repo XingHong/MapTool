@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class ExportTool
@@ -15,6 +16,7 @@ public class ExportTool
 
     static void GenLuaCode()
     {
+        EditorSceneManager.SaveOpenScenes();
         string luaFilePath = Path.Combine(Application.dataPath, "MapData.lua");
         StreamWriter file = new StreamWriter(luaFilePath, false, Encoding.UTF8);
         file.NewLine = System.Environment.NewLine;
