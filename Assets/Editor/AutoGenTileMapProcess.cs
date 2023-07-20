@@ -93,7 +93,7 @@ public class AutoGenTileMapProcess
         int errorCode = 0;
         var pixels = GetPixels(bitmap);
         HashSet<Color> colorSet = new HashSet<Color>(pixels);
-        if (colorSet.Count > 64)
+        if (colorSet.Count > 68)
             return -2;
         TextureColorScriptableObject newScriptableObject = ScriptableObject.CreateInstance<TextureColorScriptableObject>();
         newScriptableObject.tileColors = new TextureColorData[colorSet.Count];
